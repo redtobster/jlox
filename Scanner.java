@@ -82,6 +82,15 @@ class Scanner {
 			while (peek() != '\n' && !isAtEnd()) advance();
 			// IMPORTANT:
 			// when reach the end, we do not call addToken because comments are not important
+		  } else if (match('*')){
+		    while (peek() != '*' && !match('/') && !isAtEnd()) {
+				if (peek() == '\n') line++;
+				advance();
+			}
+			if (!isAtEnd()) {
+				advance();
+				advance();
+		    }
 		  } else {
 		    addToken(SLASH);
 		  }
