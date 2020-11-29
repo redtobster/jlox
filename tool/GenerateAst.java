@@ -29,7 +29,7 @@ public class GenerateAst {
 		 * semi-colon then
 		 * right hand side (list of the fields)
 		 */
-		"Binary   : Expr Left, Token operator, Expr right",
+		"Binary   : Expr left, Token operator, Expr right",
 		"Grouping : Expr expression",
 		"Literal  : Object value",
 		"Unary    : Token operator, Expr right"
@@ -51,6 +51,14 @@ public class GenerateAst {
 	writer.println();
 	writer.println("abstract class " + baseName + " {"); // not hard coding because there will be separate family of classes later on
 
+	/*
+	 * This is the indirection that is needed to add extra methods to all class types
+	 * without having to "touch" them one by one. Concrete implementation of the
+	 * interface plus polymorphism would allow us to have separation of code.
+	 */
+    defineVisitor(writer, baseName, types); // defineVisitor that generates visitor interface.
+
+
 	// AST Classes. These are each defined in the base class
 	for (String type : types){
 		String className = type.split(":")[0].trim(); //left hand side
@@ -58,12 +66,25 @@ public class GenerateAst {
 		defineType(writer, baseName, className, fields); // defineType is written just below
 	}
 
+	// we define the abstract accept() method in the base class
+	writer.println();
+	writer.println("  abstract <R> R accept(Visitor<R> visitor);");
+
 	// never forget the closing curly brackets
 	writer.println("}");
     writer.close();
 
   }
 
+  private static void defineVisitor( PrintWriter writer, String baseName, List<String> types) {
+    writer.println("  interface Visitor<R> {");
+	for (String type : types){
+		String typeName = type.split(":")[0].trim();
+		writer.println("      R visit" + typeName + baseName + "(" + typeName + " " + baseName.toLowerCase() + ");");
+	}
+
+	writer.println("  }");
+  }
   /*
    * defineType HERE!!
    */
@@ -80,6 +101,13 @@ public class GenerateAst {
 		writer.println("    this." + name + " = " + name + ";");
 	}
 
+	writer.println("    }");
+
+    // Visitor pattern.
+	writer.println();
+	writer.println("    @Override");
+	writer.println("    <R> R accept(Visitor<R> visitor) {");
+	writer.println("     return visitor.visit" + className + baseName + "(this);");
 	writer.println("    }");
 
 	// Fields
