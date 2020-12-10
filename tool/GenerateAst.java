@@ -68,7 +68,7 @@ public class GenerateAst {
 
 	// we define the abstract accept() method in the base class
 	writer.println();
-	writer.println("  abstract <R> R accept(Visitor<R> visitor);");
+	writer.println("  abstract <R> R accept(Visitor<R> visitor);"); // return type of accept is generic
 
 	// never forget the closing curly brackets
 	writer.println("}");
